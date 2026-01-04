@@ -1,0 +1,16 @@
+{
+  "name": "webrtc-interop",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@chainsafe/libp2p-noise": "^17.0.0",
+    "@chainsafe/libp2p-yamux": "^8.0.1",
+    "@libp2p/circuit-relay-v2": "^4.1.2",
+    "@libp2p/identify": "^4.0.9",
+    "@libp2p/webrtc": "^6.0.10",
+    "@libp2p/websockets": "^10.1.2",
+    "@multiformats/multiaddr": "^13.0.1",
+    "libp2p": "^3.1.2",
+    "uint8arrays": "^5.1.0"
+  }
+}

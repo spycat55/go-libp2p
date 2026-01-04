@@ -107,6 +107,9 @@ type Config struct {
 	RelayCustom bool
 	Relay       bool // should the relay transport be used
 
+	WebRTCCustom bool
+	WebRTC       bool // should the webrtc (non-direct) transport be used
+
 	EnableRelayService bool // should we run a circuitv2 relay (if publicly reachable)
 	RelayServiceOpts   []relayv2.Option
 
@@ -436,6 +439,9 @@ func (cfg *Config) addTransports() ([]fx.Option, error) {
 	)
 	if cfg.Relay {
 		fxopts = append(fxopts, fx.Invoke(circuitv2.AddTransport))
+	}
+	if cfg.WebRTC {
+		fxopts = append(fxopts, fx.Invoke(libp2pwebrtc.AddRelayTransport))
 	}
 	return fxopts, nil
 }

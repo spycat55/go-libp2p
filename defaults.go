@@ -105,6 +105,11 @@ var DefaultEnableRelay = func(cfg *Config) error {
 	return cfg.Apply(EnableRelay())
 }
 
+// DefaultEnableWebRTCTransport enables WebRTC (non-direct) dialing and listening by default.
+var DefaultEnableWebRTCTransport = func(cfg *Config) error {
+	return cfg.Apply(EnableWebRTCTransport())
+}
+
 var DefaultResourceManager = func(cfg *Config) error {
 	// Default memory limit: 1/8th of total memory, minimum 128MB, maximum 1GB
 	limits := rcmgr.DefaultLimits
@@ -183,6 +188,10 @@ var defaults = []struct {
 	{
 		fallback: func(cfg *Config) bool { return !cfg.RelayCustom },
 		opt:      DefaultEnableRelay,
+	},
+	{
+		fallback: func(cfg *Config) bool { return !cfg.WebRTCCustom },
+		opt:      DefaultEnableWebRTCTransport,
 	},
 	{
 		fallback: func(cfg *Config) bool { return cfg.ResourceManager == nil },

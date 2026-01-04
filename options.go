@@ -289,6 +289,25 @@ func DisableRelay() Option {
 	}
 }
 
+// EnableWebRTCTransport configures libp2p to enable the WebRTC (non-direct) transport.
+// (default: enabled)
+func EnableWebRTCTransport() Option {
+	return func(cfg *Config) error {
+		cfg.WebRTCCustom = true
+		cfg.WebRTC = true
+		return nil
+	}
+}
+
+// DisableWebRTCTransport configures libp2p to disable the WebRTC (non-direct) transport.
+func DisableWebRTCTransport() Option {
+	return func(cfg *Config) error {
+		cfg.WebRTCCustom = true
+		cfg.WebRTC = false
+		return nil
+	}
+}
+
 // EnableRelayService configures libp2p to run a circuit v2 relay,
 // if we detect that we're publicly reachable.
 func EnableRelayService(opts ...relayv2.Option) Option {

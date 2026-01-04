@@ -589,24 +589,41 @@ type webRTCConnection struct {
 }
 
 func newWebRTCConnection(settings webrtc.SettingEngine, config webrtc.Configuration) (webRTCConnection, error) {
+	return newWebRTCConnectionWithHandshake(settings, config, true)
+}
+
+func newWebRTCConnectionWithHandshake(settings webrtc.SettingEngine, config webrtc.Configuration, withHandshake bool) (webRTCConnection, error) {
 	api := webrtc.NewAPI(webrtc.WithSettingEngine(settings))
 	pc, err := api.NewPeerConnection(config)
 	if err != nil {
 		return webRTCConnection{}, fmt.Errorf("failed to create peer connection: %w", err)
 	}
 
-	negotiated, id := handshakeChannelNegotiated, handshakeChannelID
-	handshakeDataChannel, err := pc.CreateDataChannel("", &webrtc.DataChannelInit{
-		Negotiated: &negotiated,
-		ID:         &id,
-	})
-	if err != nil {
-		pc.Close()
-		return webRTCConnection{}, fmt.Errorf("failed to create handshake channel: %w", err)
+	var handshakeDataChannel *webrtc.DataChannel
+	if withHandshake {
+		negotiated, id := handshakeChannelNegotiated, handshakeChannelID
+		handshakeDataChannel, err = pc.CreateDataChannel("", &webrtc.DataChannelInit{
+			Negotiated: &negotiated,
+			ID:         &id,
+		})
+		if err != nil {
+			pc.Close()
+			return webRTCConnection{}, fmt.Errorf("failed to create handshake channel: %w", err)
+		}
 	}
 
 	incomingDataChannels := make(chan dataChannel, maxAcceptQueueLen)
 	pc.OnDataChannel(func(dc *webrtc.DataChannel) {
+		log.Debug("webrtc datachannel incoming", "label", dc.Label(), "id", *dc.ID())
+		if dc.Label() == "init" {
+			dc.OnOpen(func() {
+				_ = dc.Close()
+			})
+			if dc.ReadyState() == webrtc.DataChannelStateOpen {
+				_ = dc.Close()
+			}
+			return
+		}
 		dc.OnOpen(func() {
 			rwc, err := dc.Detach()
 			if err != nil {
